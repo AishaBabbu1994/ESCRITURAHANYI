@@ -468,7 +468,21 @@
     if (!container) return;
     showMessage('⛅ 丹青留影 · 请稍候...', 1200);
     try {
-      const canvas = await html2canvas(container, { scale: 2.5, backgroundColor: null });
+      const canvas = await html2canvas(container, { scale: 4, backgroundColor: '#FFFFFF' });
+      const ctx = canvas.getContext('2d');
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        const val = avg > 128 ? 255 : 0;
+        data[i] = val;
+        data[i + 1] = val;
+        data[i + 2] = val;
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      
       const link = document.createElement('a');
       link.download = `墨韵_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.png`;
       link.href = canvas.toDataURL('image/png');
