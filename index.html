@@ -321,6 +321,10 @@
       </select>
       <input type="number" id="fontSize" value="24" min="14" max="68" step="1" style="width: 70px;" title="字号">
       <input type="color" id="fontColor" value="#2C2C2C" title="墨色">
+      <select id="directionSelect" aria-label="Dirección del texto">
+        <option value="horizontal">↔️ Horizontal</option>
+        <option value="vertical">↕️ Vertical</option>
+      </select>
       <button class="tool-item" id="darkToggleBtn" title="墨夜模式">🌙 夜墨</button>
       <button class="tool-item" id="saveTxtBtn">📄 存为文稿</button>
       <button class="tool-item" id="captureImgBtn">🖌️ 成画截图</button>
@@ -365,6 +369,7 @@
   const fontSelect = document.getElementById('fontSelect');
   const fontSizeInput = document.getElementById('fontSize');
   const fontColorInput = document.getElementById('fontColor');
+  const directionSelect = document.getElementById('directionSelect');
   const darkBtn = document.getElementById('darkToggleBtn');
   const saveTxt = document.getElementById('saveTxtBtn');
   const captureImg = document.getElementById('captureImgBtn');
@@ -393,6 +398,13 @@
     editor.style.color = col;
     fontColorInput.value = col;
   }
+  if (localStorage.getItem('wenxin_direction')) {
+    let dir = localStorage.getItem('wenxin_direction');
+    editor.style.writingMode = dir === 'vertical' ? 'vertical-rl' : 'horizontal-tb';
+    directionSelect.value = dir;
+  } else {
+    editor.style.writingMode = 'horizontal-tb';
+  }
   if (localStorage.getItem('wenxin_darkmode') === 'true') document.body.classList.add('dark');
 
   editor.addEventListener('input', () => localStorage.setItem('wenxin_content', editor.innerHTML));
@@ -407,6 +419,10 @@
   fontColorInput.addEventListener('input', () => {
     editor.style.color = fontColorInput.value;
     localStorage.setItem('wenxin_color', fontColorInput.value);
+  });
+  directionSelect.addEventListener('change', () => {
+    editor.style.writingMode = directionSelect.value === 'vertical' ? 'vertical-rl' : 'horizontal-tb';
+    localStorage.setItem('wenxin_direction', directionSelect.value);
   });
 
   darkBtn.addEventListener('click', () => {
