@@ -99,7 +99,7 @@
   <div class="lantern-hanging lantern-left">🏮🎋</div>
   <div class="lantern-hanging lantern-right">🏮🌸</div>
   <div class="floating-cloud cloud-1">☁️✨</div>
-  <div class="floating-cloud cloud-2">🌫️🎋</div>
+  <div class="floating-cloud cloud-2">🌫️</div>
   <div class="falling-bamboo" id="leafAnim"></div>
 </div>
 
@@ -114,7 +114,7 @@
     </div>
     <div class="tool-palette">
       <select id="fontSelect" aria-label="书法字体">
-        <option value="'Ma Shan Zheng', 'Noto Serif SC', cursive">🏮 马山正体</option>
+        <option value="'Ma Shan Zheng', cursive"> 马山正体</option>
         <option value="'ZCOOL QingKe HuangYou', cursive">🐉 站酷黄油体</option>
         <option value="'Noto Serif SC', serif">📜 思源宋体</option>
       </select>
@@ -128,7 +128,7 @@
       <button class="tool-item" id="saveTxtBtn">📄 存为文稿</button>
       <button class="tool-item" id="captureImgBtn">🖌️ 成画截图</button>
       <label class="tool-item" style="cursor: pointer;">📂 上墨宝
-        <input type="file" id="customFontUpload" accept=".ttf, .otf, .woff" style="display: none;">
+        <input type="file" id="customFontUpload" accept=".ttf, .otf, .woff, .woff2" style="display: none;">
       </label>
     </div>
   </div>
@@ -140,14 +140,14 @@
     <div class="scroll-rod" style="margin-top: -6px;"></div>
   </div>
   <footer>
-    <span>🐼 竹韵松风 · 笔尖修禅 🧧 | 截图即保存为东方画卷</span>
+    <span> 竹韵松风 · 笔尖修禅 🧧 | 截图即保存为东方画卷</span>
   </footer>
 </div>
 <div id="toastMsg" class="toast-msg"></div>
 
 <script>
   const leafContainer = document.getElementById('leafAnim');
-  const leafSymbols = ['🍃', '🎋', '🍂', '🌸', '✨'];
+  const leafSymbols = ['🍃', '🎋', '', '🌸', '✨'];
   for (let i = 0; i < 22; i++) {
     const leaf = document.createElement('span');
     leaf.innerText = leafSymbols[Math.floor(Math.random() * leafSymbols.length)];
@@ -174,10 +174,43 @@
     setTimeout(() => { toast.style.opacity = '0'; }, duration);
   }
 
+  // Cargar fuentes personalizadas guardadas al iniciar
+  async function loadCustomFonts() {
+    const savedFonts = JSON.parse(localStorage.getItem('wenxin_customfonts') || '[]');
+    for (const fontData of savedFonts) {
+      try {
+        const fontFace = new FontFace(fontData.name, `url(${fontData.url})`);
+        await fontFace.load();
+        document.fonts.add(fontFace);
+        
+        // Verificar si ya existe la opción en el select
+        if (!fontSelect.querySelector(`[value="${fontData.name}"]`)) {
+          const option = document.createElement('option');
+          option.value = fontData.name;
+          option.text = `✨ ${fontData.displayName}`;
+          fontSelect.appendChild(option);
+        }
+      } catch (err) {
+        console.error('Error cargando fuente guardada:', fontData.name);
+      }
+    }
+  }
+
+  // Inicializar
   if (localStorage.getItem('wenxin_content')) editor.innerHTML = localStorage.getItem('wenxin_content');
-  if (localStorage.getItem('wenxin_font')) {
-    editor.style.fontFamily = localStorage.getItem('wenxin_font'); fontSelect.value = localStorage.getItem('wenxin_font');
-  } else editor.style.fontFamily = "'Ma Shan Zheng', 'Noto Serif SC', cursive";
+  
+  // Cargar fuentes personalizadas primero
+  loadCustomFonts().then(() => {
+    // Luego cargar preferencias
+    if (localStorage.getItem('wenxin_font')) {
+      const savedFont = localStorage.getItem('wenxin_font');
+      editor.style.fontFamily = savedFont;
+      fontSelect.value = savedFont;
+    } else {
+      editor.style.fontFamily = "'Ma Shan Zheng', cursive";
+    }
+  });
+  
   if (localStorage.getItem('wenxin_fontsize')) {
     let sz = localStorage.getItem('wenxin_fontsize'); editor.style.fontSize = sz + 'px'; fontSizeInput.value = sz;
   }
@@ -207,16 +240,50 @@
 
   fontUpload.addEventListener('change', async (e) => {
     const file = e.target.files[0]; if (!file) return;
-    const fontName = 'Custom_' + Date.now();
+    
+    // Validar tipo de archivo
+    const validTypes = ['font/ttf', 'font/otf', 'font/woff', 'font/woff2'];
+    if (!validTypes.includes(file.type)) {
+      showMessage('❌ Formato no soportado', 2000);
+      return;
+    }
+    
+    const fontName = 'CustomFont_' + Date.now();
+    const displayName = file.name.split('.')[0].slice(0, 20);
+    
     try {
-      const fontFace = new FontFace(fontName, `url(${URL.createObjectURL(file)})`);
-      await fontFace.load(); document.fonts.add(fontFace);
-      editor.style.fontFamily = fontName;
+      showMessage(' Cargando fuente...', 1000);
+      
+      const arrayBuffer = await file.arrayBuffer();
+      const fontFace = new FontFace(fontName, arrayBuffer);
+      
+      await fontFace.load();
+      document.fonts.add(fontFace);
+      
+      // Guardar en localStorage como base64
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const savedFonts = JSON.parse(localStorage.getItem('wenxin_customfonts') || '[]');
+      savedFonts.push({
+        name: fontName,
+        displayName: displayName,
+        url: `data:font/${file.type};base64,${base64}`
+      });
+      localStorage.setItem('wenxin_customfonts', JSON.stringify(savedFonts));
+      
+      // Añadir al select
       const option = document.createElement('option');
-      option.value = fontName; option.text = `✨ ${file.name.split('.')[0].slice(0, 18)}`;
-      fontSelect.appendChild(option); fontSelect.value = fontName;
-      localStorage.setItem('wenxin_font', fontName); showMessage(`「${file.name}」已载入卷轴`);
-    } catch (err) { showMessage('字体无法载入', 2000); }
+      option.value = fontName;
+      option.text = `✨ ${displayName}`;
+      fontSelect.appendChild(option);
+      fontSelect.value = fontName;
+      editor.style.fontFamily = fontName;
+      localStorage.setItem('wenxin_font', fontName);
+      
+      showMessage(`✅ 「${displayName}」 cargada`, 2000);
+    } catch (err) {
+      console.error(err);
+      showMessage(' Error al cargar fuente', 2000);
+    }
     e.target.value = '';
   });
 
@@ -235,14 +302,16 @@
     if (!container) return;
     showMessage('⛅ 丹青留影 · 请稍候...', 1200);
     try {
-      // Esperar a que todas las fuentes estén completamente cargadas en el navegador
+      // Esperar a que todas las fuentes estén cargadas
       await document.fonts.ready;
+      await new Promise(resolve => setTimeout(resolve, 500)); // Pequeña pausa adicional
       
       const canvas = await html2canvas(container, { 
         scale: 4, 
         backgroundColor: '#FFFFFF',
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        logging: false
       });
       
       const ctx = canvas.getContext('2d');
@@ -259,8 +328,11 @@
       const link = document.createElement('a');
       link.download = `墨韵_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.png`;
       link.href = canvas.toDataURL('image/png'); link.click();
-      showMessage('🖼️ 画卷已存入丹青册');
-    } catch (err) { showMessage('截图失败，可尝试轻刷新', 2000); }
+      showMessage('️ 画卷已存入丹青册');
+    } catch (err) {
+      console.error(err);
+      showMessage('截图失败，可尝试轻刷新', 2000);
+    }
   }
   captureImg.addEventListener('click', captureScrollImage);
 
