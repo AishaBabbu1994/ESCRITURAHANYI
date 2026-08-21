@@ -297,7 +297,7 @@
 </head>
 <body>
 <div class="decor-bg">
-  <div class="lantern-hanging lantern-left">🎋</div>
+  <div class="lantern-hanging lantern-left">🏮🎋</div>
   <div class="lantern-hanging lantern-right">🏮🌸</div>
   <div class="floating-cloud cloud-1">☁️✨</div>
   <div class="floating-cloud cloud-2">🌫️🎋</div>
@@ -323,13 +323,13 @@
       <input type="color" id="fontColor" value="#2C2C2C" title="墨色">
       <select id="directionSelect" aria-label="Dirección del texto">
         <option value="horizontal">↔️ Horizontal</option>
-        <option value="vertical">↕️ Vertical</option>
+        <option value="vertical">️ Vertical</option>
       </select>
       <button class="tool-item" id="darkToggleBtn" title="墨夜模式">🌙 夜墨</button>
       <button class="tool-item" id="saveTxtBtn">📄 存为文稿</button>
-      <button class="tool-item" id="captureImgBtn">🖌️ 成画截图</button>
+      <button class="tool-item" id="captureImgBtn">️ 成画截图</button>
       <label class="tool-item" style="cursor: pointer;">📂 上墨宝
-        <input type="file" id="customFontUpload" accept=".ttf, .otf, .woff" style="display: none;">
+        <input type="file" id="customFontUpload" accept=".ttf,.otf,.woff,.woff2,application/font-sfnt,application/font-woff,*/*" style="display: none;">
       </label>
     </div>
   </div>
@@ -468,7 +468,6 @@
     if (!container) return;
     showMessage(' 丹青留影 · 请稍候...', 1200);
     try {
-      // SOLO AÑADÍ ESTO: Esperar a que las fuentes carguen completamente
       await document.fonts.ready;
       await new Promise(resolve => setTimeout(resolve, 300));
       
