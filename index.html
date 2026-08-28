@@ -485,6 +485,22 @@
       cursor: pointer;
     }
 
+    /* ═══ 导入字体标签 ═══ */
+    .font-upload-label {
+      position: relative;
+    }
+    .font-upload-label:hover {
+      border-color: var(--cinnabar-soft);
+      color: var(--cinnabar);
+    }
+    #fontLoadedBadge {
+      animation: badgeIn 0.4s var(--ease-spring);
+    }
+    @keyframes badgeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
     /* ═══ 焦点状态 ═══ */
     select:focus, input:focus {
       border-color: var(--ancient-gold);
@@ -535,10 +551,11 @@
         <option value="horizontal">横向</option>
         <option value="vertical">纵向</option>
       </select>
-      <label class="tool-item">
+      <label class="tool-item font-upload-label" title="支持 .ttf / .otf / .woff 格式">
         <span>📁 导入字体</span>
-        <input type="file" id="customFontUpload" accept=".ttf, .otf, .woff" style="display: none;">
+        <input type="file" id="customFontUpload" accept=".ttf,.otf,.woff,font/ttf,font/otf,font/woff" style="display: none;">
       </label>
+      <span id="fontLoadedBadge" style="display:none; font-size:11px; color:var(--ancient-gold); background:rgba(184,149,79,0.1); padding:2px 8px; border-radius:6px; border:1px solid rgba(184,149,79,0.2);">✦ 自定义字体已加载</span>
     </div>
   </div>
 
@@ -595,8 +612,17 @@
     darkBtn.innerText = '☀️ 日间模式';
   }
   if (localStorage.getItem('lite_fontfamily')) {
-    editor.style.fontFamily = localStorage.getItem('lite_fontfamily');
-    fontSelect.value = localStorage.getItem('lite_fontfamily');
+    const savedFont = localStorage.getItem('lite_fontfamily');
+    editor.style.fontFamily = savedFont;
+    // Si es una fuente del select, marcarla; si es custom, mostrar badge
+    const selectOptions = Array.from(fontSelect.options).map(o => o.value);
+    if (selectOptions.includes(savedFont)) {
+      fontSelect.value = savedFont;
+    } else {
+      // Es una fuente personalizada previamente cargada
+      document.getElementById('fontLoadedBadge').style.display = 'inline-block';
+      document.getElementById('fontLoadedBadge').innerText = '✦ 自定义字体';
+    }
   }
   if (localStorage.getItem('lite_fontcolor')) {
     editor.style.color = localStorage.getItem('lite_fontcolor');
@@ -634,15 +660,37 @@
   fontUpload.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Validar extensión
+    const ext = file.name.split('.').pop().toLowerCase();
+    const validExts = ['ttf', 'otf', 'woff', 'woff2'];
+    if (!validExts.includes(ext)) {
+      showMessage('仅支持 .ttf / .otf / .woff 格式 ✗');
+      fontUpload.value = '';
+      return;
+    }
+
     const fontName = 'CustomFont_' + Date.now();
-    const fontFace = new FontFace(fontName, `url(${URL.createObjectURL(file)})`);
+    const fontUrl = URL.createObjectURL(file);
+    const fontFace = new FontFace(fontName, `url(${fontUrl})`);
+
     try {
       await fontFace.load();
       document.fonts.add(fontFace);
       editor.style.fontFamily = fontName;
-      showMessage('字体加载成功 ✓');
+      localStorage.setItem('lite_fontfamily', fontName);
+
+      // Mostrar badge
+      const badge = document.getElementById('fontLoadedBadge');
+      badge.style.display = 'inline-block';
+      badge.innerText = '✦ ' + file.name.replace(/\.[^.]+$/, '');
+
+      showMessage('字体 "' + file.name + '" 加载成功 ✓');
     } catch (err) {
-      showMessage('格式不支持 ✗');
+      console.error(err);
+      showMessage('字体加载失败，请检查文件格式 ✗');
+    } finally {
+      fontUpload.value = '';
     }
   });
 
