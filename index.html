@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,18 +6,47 @@
   <meta name="description" content="墨香写作 - 极简便携版">
   <title>墨香斋 · 极简版</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
   <style>
-    /* Estética Windows 7 / Minimalista */
+    /* ════════════════════════════════════════
+       墨香斋 · 美学升级版
+       Paleta: 宣纸白 · 松烟墨 · 朱砂印 · 古金
+       ════════════════════════════════════════ */
     :root {
-      --win-bg: #F0F0F0;
-      --win-panel: #FFFFFF;
-      --win-border: #A0A0A0;
-      --win-text: #000000;
-      --win-accent: #3399FF;
-      --paper-color: #FFFFFF;
-      --ink-color: #333333;
-      --gold-color: #FFD700;
+      /* 宣纸色系 */
+      --xuan-paper: #F7F3E9;
+      --xuan-light: #FDFBF6;
+      --xuan-dark: #E8E0D0;
+      --xuan-shadow: #D4C9B5;
+
+      /* 墨色 */
+      --ink-black: #1A1A1A;
+      --ink-soft: #3D3D3D;
+      --ink-light: #666666;
+      --ink-faint: #999999;
+
+      /* 朱砂与古金 */
+      --cinnabar: #C23A2B;
+      --cinnabar-soft: #D46357;
+      --ancient-gold: #B8954F;
+      --ancient-gold-light: #D4B87A;
+
+      /* 功能色 */
+      --accent: var(--cinnabar);
+      --accent-hover: var(--cinnabar-soft);
+      --panel-bg: var(--xuan-light);
+      --border-subtle: rgba(180, 160, 130, 0.3);
+      --border-medium: rgba(180, 160, 130, 0.5);
+
+      /* 阴影 */
+      --shadow-sm: 0 1px 3px rgba(60, 40, 20, 0.08);
+      --shadow-md: 0 4px 12px rgba(60, 40, 20, 0.10);
+      --shadow-lg: 0 8px 30px rgba(60, 40, 20, 0.12);
+      --shadow-inset: inset 0 2px 8px rgba(60, 40, 20, 0.06);
+
+      /* 动效 */
+      --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     * {
@@ -27,190 +56,462 @@
     }
 
     body {
-      font-family: "Segoe UI", Tahoma, Arial, "Microsoft YaHei", sans-serif;
-      background-color: var(--win-bg);
-      color: var(--win-text);
+      font-family: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+      background: var(--xuan-paper);
+      color: var(--ink-soft);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       overflow-x: hidden;
+      line-height: 1.8;
+      /* 宣纸纹理 */
+      background-image: 
+        radial-gradient(ellipse at 20% 50%, rgba(200, 180, 150, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(200, 180, 150, 0.03) 0%, transparent 50%);
     }
 
-    /* Fondo decorativo deshabilitado para rendimiento */
-    .decor-bg { display: none; }
+    /* ═══ 背景装饰 ═══ */
+    .decor-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .decor-bg::before {
+      content: "";
+      position: absolute;
+      top: -10%;
+      right: -5%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(184, 149, 79, 0.04) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .decor-bg::after {
+      content: "";
+      position: absolute;
+      bottom: -10%;
+      left: -5%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(194, 58, 43, 0.03) 0%, transparent 70%);
+      border-radius: 50%;
+    }
 
     .main-container {
-      max-width: 960px;
-      margin: 10px auto;
-      padding: 10px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 20px;
       width: 100%;
       flex: 1;
+      position: relative;
+      z-index: 1;
     }
 
-    /* Barra de herramientas estilo Aplicación de Escritorio */
+    /* ═══ 顶部工具栏 ═══ */
     .scroll-header {
-      background: linear-gradient(to bottom, #F2F2F2, #EBEBEB);
-      border: 1px solid var(--win-border);
-      border-radius: 3px;
-      padding: 8px 15px;
-      margin-bottom: 10px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      gap: 14px;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+    .scroll-header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cinnabar), var(--ancient-gold), var(--cinnabar));
+      opacity: 0.6;
     }
 
     .title-area {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
     }
+
+    /* 印章 */
     .chinese-stamp {
-      background: #D32F2F;
+      background: var(--cinnabar);
       color: white;
-      width: 35px;
-      height: 35px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: bold;
+      border-radius: 4px;
+      font-family: "Ma Shan Zheng", cursive;
+      box-shadow: 0 2px 8px rgba(194, 58, 43, 0.3);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+    }
+    .chinese-stamp::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      border: 1px solid rgba(255,255,255,0.3);
       border-radius: 2px;
     }
-    h1 {
-      font-size: 1.2rem;
-      color: #333;
+    .chinese-stamp:hover {
+      transform: scale(1.08) rotate(-3deg);
+      box-shadow: 0 4px 16px rgba(194, 58, 43, 0.4);
     }
-    .sub { display: none; } /* Oculto en versión lite */
+
+    h1 {
+      font-size: 1.35rem;
+      color: var(--ink-black);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      font-family: "ZCOOL XiaoWei", "Noto Serif SC", serif;
+    }
+    .sub {
+      display: none;
+    }
 
     .tool-palette {
       display: flex;
-      gap: 5px;
+      gap: 8px;
       flex-wrap: wrap;
       align-items: center;
     }
 
-    /* Botones estilo Windows Classic */
-    .tool-item, select, input {
-      background: #FFFFFF;
-      border: 1px solid #707070;
-      padding: 4px 10px;
+    /* ═══ 控件样式 ═══ */
+    .tool-item, select, input[type="number"], input[type="color"] {
+      background: var(--xuan-light);
+      border: 1.5px solid var(--border-subtle);
+      padding: 6px 14px;
       font-size: 13px;
       cursor: pointer;
-      color: #333;
-      border-radius: 2px;
+      color: var(--ink-soft);
+      border-radius: 8px;
+      font-family: "Noto Serif SC", serif;
+      transition: all 0.25s var(--ease-out);
+      outline: none;
+    }
+    .tool-item {
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-item::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(184, 149, 79, 0.08), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
     .tool-item:hover {
-      background: #E5F1FB;
-      border-color: #0078D7;
+      border-color: var(--ancient-gold);
+      color: var(--ink-black);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
     }
-    input[type="number"] { width: 50px; }
-    input[type="color"] { width: 40px; padding: 1px; height: 25px; }
+    .tool-item:hover::before {
+      opacity: 1;
+    }
+    .tool-item:active {
+      transform: translateY(0);
+    }
 
-    /* Área de edición simplificada */
+    select {
+      padding-right: 28px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    input[type="number"] {
+      width: 56px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type="color"] {
+      width: 44px;
+      height: 32px;
+      padding: 3px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border-radius: 5px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ═══ 编辑器区域 ═══ */
     .scroll-editor {
-      background: var(--win-panel);
-      border: 1px solid var(--win-border);
-      box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+      background: var(--panel-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      position: relative;
+      transition: box-shadow 0.4s ease;
+    }
+    .scroll-editor:hover {
+      box-shadow: 0 12px 40px rgba(60, 40, 20, 0.14);
     }
 
+    /* 卷轴装饰条 */
     .scroll-rod {
-      height: 4px;
-      background: #DDD;
-      border-bottom: 1px solid #CCC;
+      height: 6px;
+      background: linear-gradient(90deg, 
+        var(--xuan-dark) 0%, 
+        var(--ancient-gold-light) 20%, 
+        var(--ancient-gold) 50%, 
+        var(--ancient-gold-light) 80%, 
+        var(--xuan-dark) 100%
+      );
+      position: relative;
+    }
+    .scroll-rod::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        transparent 100%
+      );
     }
 
     #editor {
       min-height: 70vh;
-      padding: 40px;
-      font-size: 20px;
-      line-height: 1.6;
+      padding: 48px 56px;
+      font-size: 22px;
+      line-height: 1.85;
       outline: none;
-      font-family: 'Ma Shan Zheng', serif;
+      font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
       word-wrap: break-word;
+      color: var(--ink-black);
+      background: 
+        linear-gradient(to bottom, transparent 95%, rgba(180, 160, 130, 0.08) 95%),
+        linear-gradient(to right, rgba(180, 160, 130, 0.04) 1px, transparent 1px);
+      background-size: 100% 2.5em, 2.5em 100%;
+      transition: background 0.3s ease;
     }
 
     #editor[placeholder]:empty:before {
       content: attr(placeholder);
-      color: #999;
+      color: var(--ink-faint);
+      font-style: italic;
     }
 
     .editor-footer {
       text-align: right;
-      padding: 5px 15px;
+      padding: 8px 20px;
       font-size: 11px;
-      color: #777;
-      background: #F9F9F9;
-      border-top: 1px solid #EEE;
+      color: var(--ink-faint);
+      background: linear-gradient(to bottom, transparent, rgba(180, 160, 130, 0.05));
+      border-top: 1px solid var(--border-subtle);
+      letter-spacing: 0.08em;
     }
 
+    /* ═══ 页脚 ═══ */
     footer {
       text-align: center;
-      padding: 15px;
+      padding: 24px 15px 30px;
       font-size: 12px;
-      color: #666;
+      color: var(--ink-faint);
+      position: relative;
+    }
+    footer::before {
+      content: "❖";
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ancient-gold);
+      font-size: 14px;
+      opacity: 0.5;
+    }
+    .red-accent { color: var(--cinnabar); }
+    .golden-text { 
+      color: var(--ancient-gold); 
+      font-weight: 600;
+      letter-spacing: 0.1em;
     }
 
-    /* Modo Noche Minimalista */
+    /* ═══ 悬浮装饰 ═══ */
+    .floating-emoji {
+      position: fixed;
+      font-size: 1.8rem;
+      opacity: 0.2;
+      pointer-events: none;
+      animation: floatUp 8s ease-in-out infinite;
+      z-index: 0;
+      filter: blur(0.5px);
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 0; }
+      8%   { opacity: 0.2; }
+      50%  { transform: translateY(-50vh) rotate(180deg) scale(1.1); }
+      92%  { opacity: 0.2; }
+      100% { transform: translateY(-110vh) rotate(360deg) scale(0.9); opacity: 0; }
+    }
+
+    /* ═══ 提示消息 ═══ */
+    #toastMsg {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(40, 35, 30, 0.9);
+      color: var(--xuan-light);
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.4s var(--ease-spring);
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(184, 149, 79, 0.2);
+      box-shadow: var(--shadow-lg);
+      letter-spacing: 0.05em;
+      z-index: 1000;
+    }
+    #toastMsg.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ═══ 夜间模式 ═══ */
     body.dark {
-      --win-bg: #1A1A1A;
-      --win-panel: #252525;
-      --win-border: #444;
-      --win-text: #CCC;
-      --paper-color: #252525;
-      --ink-color: #DDD;
-    }
-    body.dark .scroll-header { background: #333; border-color: #555; }
-    body.dark .tool-item, body.dark select, body.dark input {
-      background: #444; color: #EEE; border-color: #666;
-    }
-    body.dark h1 { color: #EEE; }
+      --xuan-paper: #1C1A17;
+      --xuan-light: #252320;
+      --xuan-dark: #2E2B27;
+      --xuan-shadow: #3A3630;
 
-    @media (max-width: 600px) {
-      .scroll-header { flex-direction: column; gap: 8px; }
-      #editor { padding: 20px; }
+      --ink-black: #E8E0D0;
+      --ink-soft: #D4C9B5;
+      --ink-light: #A89B88;
+      --ink-faint: #7A6F5E;
+
+      --cinnabar: #D46357;
+      --cinnabar-soft: #E08A80;
+      --ancient-gold: #C4A55A;
+      --ancient-gold-light: #D4B87A;
+
+      --border-subtle: rgba(120, 100, 80, 0.25);
+      --border-medium: rgba(120, 100, 80, 0.4);
+
+      --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    body.dark .scroll-header::before {
+      opacity: 0.4;
+    }
+    body.dark #editor {
+      background: 
+        linear-gradient(to bottom, transparent 95%, rgba(120, 100, 80, 0.06) 95%),
+        linear-gradient(to right, rgba(120, 100, 80, 0.03) 1px, transparent 1px);
+      background-size: 100% 2.5em, 2.5em 100%;
+    }
+    body.dark .scroll-rod {
+      background: linear-gradient(90deg, 
+        var(--xuan-dark) 0%, 
+        var(--ancient-gold-light) 20%, 
+        var(--ancient-gold) 50%, 
+        var(--ancient-gold-light) 80%, 
+        var(--xuan-dark) 100%
+      );
     }
 
-    /* Dirección de texto */
+    /* ═══ 纵向文字 ═══ */
     #editor.vertical {
       writing-mode: vertical-rl;
       text-orientation: upright;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.2em;
+      padding: 40px 48px;
     }
 
-    /* Emojis animados */
-    .floating-emoji {
-      position: fixed;
-      font-size: 2rem;
-      opacity: 0.35;
-      pointer-events: none;
-      animation: floatUp 6s linear infinite;
-      z-index: 0;
-    }
-    @keyframes floatUp {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
-      10%  { opacity: 0.35; }
-      90%  { opacity: 0.35; }
-      100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+    /* ═══ 响应式 ═══ */
+    @media (max-width: 700px) {
+      .main-container { padding: 12px; }
+      .scroll-header { 
+        flex-direction: column; 
+        gap: 12px;
+        padding: 12px 16px;
+      }
+      .tool-palette { 
+        justify-content: center; 
+        gap: 6px;
+      }
+      .tool-item, select, input {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+      h1 { font-size: 1.15rem; }
+      #editor { 
+        padding: 28px 24px; 
+        font-size: 19px;
+      }
+      #editor.vertical {
+        padding: 24px 28px;
+      }
     }
 
-    /* Detalles dorados y rojos */
-    .golden-border { border-color: var(--gold-color) !important; }
-    .golden-text { color: var(--gold-color); }
-    .red-accent { color: #D32F2F; }
-    .chinese-stamp {
-      animation: stampPulse 2s ease-in-out infinite;
+    @media (max-width: 400px) {
+      .tool-palette { gap: 5px; }
+      .tool-item, select, input { padding: 4px 8px; }
+      #editor { padding: 20px 16px; }
     }
-    @keyframes stampPulse {
-      0%, 100% { transform: scale(1); }
-      50%      { transform: scale(1.08); }
+
+    /* ═══ 导入字体按钮特殊样式 ═══ */
+    label.tool-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    label.tool-item:hover {
+      cursor: pointer;
+    }
+
+    /* ═══ 焦点状态 ═══ */
+    select:focus, input:focus {
+      border-color: var(--ancient-gold);
+      box-shadow: 0 0 0 3px rgba(184, 149, 79, 0.15);
+    }
+
+    /* ═══ 滚动条美化 ═══ */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-medium);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--ancient-gold);
     }
   </style>
+<base target="_blank">
 </head>
 <body>
 
-<div class="decor-bg"></div> <!-- Mantener estructura aunque no se use -->
+<div class="decor-bg"></div>
 
 <div class="main-container">
   <div class="scroll-header">
@@ -222,18 +523,20 @@
       <select id="fontSelect">
         <option value="'Ma Shan Zheng', serif">书法体</option>
         <option value="'Noto Serif SC', serif">宋体</option>
+        <option value="'ZCOOL XiaoWei', serif">小薇体</option>
         <option value="Arial, sans-serif">标准体</option>
       </select>
       <input type="number" id="fontSize" value="22" min="12" max="72" title="字号">
       <input type="color" id="fontColor" value="#333333" title="文字颜色">
-      <button class="tool-item" id="darkToggleBtn">夜间模式</button>
-      <button class="tool-item" id="saveTxtBtn">保存文本</button>
-      <button class="tool-item" id="captureImgBtn">保存图片</button>
+      <button class="tool-item" id="darkToggleBtn">🌙 夜间模式</button>
+      <button class="tool-item" id="saveTxtBtn">💾 保存文本</button>
+      <button class="tool-item" id="captureImgBtn">📷 保存图片</button>
       <select id="textDirSelect" title="文字方向">
         <option value="horizontal">横向</option>
         <option value="vertical">纵向</option>
       </select>
-      <label class="tool-item">导入字体
+      <label class="tool-item">
+        <span>📁 导入字体</span>
         <input type="file" id="customFontUpload" accept=".ttf, .otf, .woff" style="display: none;">
       </label>
     </div>
@@ -241,8 +544,8 @@
 
   <div class="scroll-editor">
     <div class="scroll-rod"></div>
-    <div id="editor" contenteditable="true" placeholder="在此输入内容..."></div>
-    <div class="editor-footer">自动保存已开启</div>
+    <div id="editor" contenteditable="true" placeholder="在此输入内容，墨香伴你书写..."></div>
+    <div class="editor-footer">✦ 自动保存已开启 · 内容仅存储于本地</div>
     <div class="scroll-rod"></div>
   </div>
 
@@ -251,18 +554,17 @@
     <span class="golden-text">墨香斋 Lite</span>
     <span class="red-accent">❤</span>
     <span>&nbsp;|&nbsp;兼容旧版浏览器与低配电脑</span>
-    <span class="floating-emoji" style="left:10%; animation-delay:0s;">🏮</span>
-    <span class="floating-emoji" style="left:30%; animation-delay:2s;">✨</span>
-    <span class="floating-emoji" style="left:55%; animation-delay:4s;">🔥</span>
-    <span class="floating-emoji" style="left:80%; animation-delay:1s;">💮</span>
+    <span class="floating-emoji" style="left:8%; animation-delay:0s;">🏮</span>
+    <span class="floating-emoji" style="left:25%; animation-delay:2.5s;">✨</span>
+    <span class="floating-emoji" style="left:50%; animation-delay:5s;">🔥</span>
+    <span class="floating-emoji" style="left:72%; animation-delay:1.5s;">💮</span>
+    <span class="floating-emoji" style="left:90%; animation-delay:4s;">🎋</span>
   </footer>
 </div>
 
-<div id="toastMsg" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:5px 15px; border-radius:3px; font-size:12px; opacity:0; transition:0.3s; pointer-events:none;"></div>
+<div id="toastMsg"></div>
 
 <script>
-  // Eliminamos lógica de hojas cayendo para ahorrar recursos
-
   const editor = document.getElementById('editor');
   const fontSelect = document.getElementById('fontSelect');
   const fontSizeInput = document.getElementById('fontSize');
@@ -276,23 +578,39 @@
   function showMessage(msg) {
     const toast = document.getElementById('toastMsg');
     toast.innerText = msg;
-    toast.style.opacity = '1';
-    setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 2000);
   }
 
-  // Cargar datos
-  if (localStorage.getItem('lite_content')) editor.innerHTML = localStorage.getItem('lite_content');
+  // ═══ 恢复数据 ═══
+  if (localStorage.getItem('lite_content')) {
+    editor.innerHTML = localStorage.getItem('lite_content');
+  }
   if (localStorage.getItem('lite_fontsize')) {
     editor.style.fontSize = localStorage.getItem('lite_fontsize') + 'px';
     fontSizeInput.value = localStorage.getItem('lite_fontsize');
   }
-  if (localStorage.getItem('lite_darkmode') === 'true') document.body.classList.add('dark');
+  if (localStorage.getItem('lite_darkmode') === 'true') {
+    document.body.classList.add('dark');
+    darkBtn.innerText = '☀️ 日间模式';
+  }
+  if (localStorage.getItem('lite_fontfamily')) {
+    editor.style.fontFamily = localStorage.getItem('lite_fontfamily');
+    fontSelect.value = localStorage.getItem('lite_fontfamily');
+  }
+  if (localStorage.getItem('lite_fontcolor')) {
+    editor.style.color = localStorage.getItem('lite_fontcolor');
+    fontColorInput.value = localStorage.getItem('lite_fontcolor');
+  }
 
-  // Eventos
-  editor.addEventListener('input', () => localStorage.setItem('lite_content', editor.innerHTML));
-  
+  // ═══ 事件绑定 ═══
+  editor.addEventListener('input', () => {
+    localStorage.setItem('lite_content', editor.innerHTML);
+  });
+
   fontSelect.addEventListener('change', () => {
     editor.style.fontFamily = fontSelect.value;
+    localStorage.setItem('lite_fontfamily', fontSelect.value);
   });
 
   fontSizeInput.addEventListener('input', () => {
@@ -302,35 +620,42 @@
 
   fontColorInput.addEventListener('input', () => {
     editor.style.color = fontColorInput.value;
+    localStorage.setItem('lite_fontcolor', fontColorInput.value);
   });
 
   darkBtn.addEventListener('click', () => {
     document.body.classList.toggle('dark');
-    localStorage.setItem('lite_darkmode', document.body.classList.contains('dark'));
+    const isDark = document.body.classList.contains('dark');
+    localStorage.setItem('lite_darkmode', isDark);
+    darkBtn.innerText = isDark ? '☀️ 日间模式' : '🌙 夜间模式';
+    showMessage(isDark ? '已切换至夜间模式' : '已切换至日间模式');
   });
 
   fontUpload.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const fontName = 'CustomFont';
+    const fontName = 'CustomFont_' + Date.now();
     const fontFace = new FontFace(fontName, `url(${URL.createObjectURL(file)})`);
     try {
       await fontFace.load();
       document.fonts.add(fontFace);
       editor.style.fontFamily = fontName;
-      showMessage('字体加载成功');
-    } catch (err) { showMessage('格式不支持'); }
+      showMessage('字体加载成功 ✓');
+    } catch (err) {
+      showMessage('格式不支持 ✗');
+    }
   });
 
   saveTxt.addEventListener('click', () => {
-    const blob = new Blob([editor.innerText], {type: 'text/plain'});
+    const blob = new Blob([editor.innerText], {type: 'text/plain;charset=utf-8'});
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = '文稿.txt';
+    link.download = '文稿_' + new Date().toLocaleDateString() + '.txt';
     link.click();
-    showMessage('已保存文本');
+    showMessage('已保存文本 ✓');
   });
 
+  // ═══ 文字方向 ═══
   if (localStorage.getItem('lite_textdir') === 'vertical') {
     editor.classList.add('vertical');
     textDir.value = 'vertical';
@@ -340,21 +665,49 @@
     if (textDir.value === 'vertical') {
       editor.classList.add('vertical');
       localStorage.setItem('lite_textdir', 'vertical');
+      showMessage('已切换至纵向排版');
     } else {
       editor.classList.remove('vertical');
       localStorage.setItem('lite_textdir', 'horizontal');
+      showMessage('已切换至横向排版');
     }
   });
 
+  // ═══ 保存图片 ═══
   captureImg.addEventListener('click', async () => {
     showMessage('正在生成图片...');
     try {
-      const canvas = await html2canvas(document.querySelector('.scroll-editor'), { scale: 1.5 });
+      const canvas = await html2canvas(document.querySelector('.scroll-editor'), { 
+        scale: 2,
+        backgroundColor: getComputedStyle(document.querySelector('.scroll-editor')).backgroundColor
+      });
       const link = document.createElement('a');
-      link.download = '墨香斋.png';
-      link.href = canvas.toDataURL();
+      link.download = '墨香斋_' + new Date().toLocaleDateString() + '.png';
+      link.href = canvas.toDataURL('image/png');
       link.click();
-    } catch (err) { showMessage('保存失败'); }
+      showMessage('图片保存成功 ✓');
+    } catch (err) {
+      showMessage('保存失败，请重试');
+    }
+  });
+
+  // ═══ 键盘快捷键 ═══
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 's') {
+        e.preventDefault();
+        saveTxt.click();
+      }
+      if (e.key === 'd') {
+        e.preventDefault();
+        darkBtn.click();
+      }
+    }
+  });
+
+  // ═══ 页面加载完成提示 ═══
+  window.addEventListener('load', () => {
+    showMessage('墨香斋已就绪，开始书写吧');
   });
 </script>
 </body>
